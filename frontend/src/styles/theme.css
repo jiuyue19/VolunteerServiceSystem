@@ -1,0 +1,98 @@
+/* 全局主题色配置 */
+:root {
+  --el-color-primary: #ce4c4c;
+  --el-color-primary-light-3: #d97373;
+  --el-color-primary-light-5: #e49a9a;
+  --el-color-primary-light-7: #efc1c1;
+  --el-color-primary-light-8: #f4d8d8;
+  --el-color-primary-light-9: #fae8e8;
+  --el-color-primary-dark-2: #a53d3d;
+}
+
+/* 按钮主题色 */
+.el-button--primary {
+  --el-button-bg-color: #ce4c4c;
+  --el-button-border-color: #ce4c4c;
+  --el-button-hover-bg-color: #d97373;
+  --el-button-hover-border-color: #d97373;
+  --el-button-active-bg-color: #a53d3d;
+  --el-button-active-border-color: #a53d3d;
+}
+
+/* 链接主题色 */
+.el-link.el-link--primary {
+  --el-link-text-color: #ce4c4c;
+  --el-link-hover-text-color: #d97373;
+}
+
+/* 标签主题色 */
+.el-tag--primary {
+  --el-tag-bg-color: #fae8e8;
+  --el-tag-border-color: #efc1c1;
+  --el-tag-text-color: #ce4c4c;
+}
+
+/* 菜单激活状态 */
+.el-menu-item.is-active {
+  color: #ce4c4c !important;
+  border-bottom-color: #ce4c4c !important;
+}
+
+/* 输入框聚焦状态 */
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px #ce4c4c inset !important;
+}
+
+/* 单选框选中状态 */
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: #ce4c4c;
+  border-color: #ce4c4c;
+}
+
+.el-radio__input.is-checked + .el-radio__label {
+  color: #ce4c4c;
+}
+
+/* 复选框选中状态 */
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #ce4c4c;
+  border-color: #ce4c4c;
+}
+
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: #ce4c4c;
+}
+
+/* 分页器 */
+.el-pagination .el-pager li.is-active {
+  color: #ce4c4c;
+}
+
+.el-pagination .el-pager li:hover {
+  color: #ce4c4c;
+}
+
+/* 开关 */
+.el-switch.is-checked .el-switch__core {
+  background-color: #ce4c4c;
+  border-color: #ce4c4c;
+}
+
+/* 滑块 */
+.el-slider__button {
+  border-color: #ce4c4c;
+}
+
+.el-slider__bar {
+  background-color: #ce4c4c;
+}
+
+/* 进度条 */
+.el-progress-bar__inner {
+  background-color: #ce4c4c;
+}
+
+/* 加载 */
+.el-loading-spinner .path {
+  stroke: #ce4c4c;
+}

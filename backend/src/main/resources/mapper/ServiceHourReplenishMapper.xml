@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ServiceHourReplenishMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.ServiceHourReplenish">
+        <id property="id" column="id"/>
+        <result property="volunteerId" column="volunteer_id"/>
+        <result property="activityName" column="activity_name"/>
+        <result property="hours" column="hours"/>
+        <result property="earnedPoints" column="earned_points"/>
+        <result property="reason" column="reason"/>
+        <result property="evidenceFiles" column="evidence_files"/>
+        <result property="status" column="status"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createdAt" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM service_hour_replenish ORDER BY apply_time DESC
+    </select>
+
+    <select id="selectAllWithVolunteerInfo" resultType="java.util.Map">
+        SELECT r.id, r.volunteer_id as volunteerId, r.activity_name as activityName, 
+               r.hours, r.earned_points as earnedPoints, r.reason, r.evidence_files as evidenceFiles,
+               r.status, r.reject_reason as rejectReason, r.admin_id as adminId,
+               r.apply_time as applyTime, r.audit_time as auditTime, 
+               r.create_time as createdAt, r.update_time as updateTime,
+               v.real_name as volunteerName, v.username as volunteerUsername
+        FROM service_hour_replenish r
+        LEFT JOIN volunteer v ON r.volunteer_id = v.id
+        ORDER BY r.apply_time DESC
+    </select>
+
+    <select id="selectByVolunteerId" resultMap="BaseResultMap">
+        SELECT * FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} 
+        ORDER BY apply_time DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM service_hour_replenish WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.ServiceHourReplenish" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO service_hour_replenish (volunteer_id, activity_name, hours, earned_points, reason, evidence_files, status, apply_time)
+        VALUES (#{volunteerId}, #{activityName}, #{hours}, #{earnedPoints}, #{reason}, #{evidenceFiles}, #{status}, #{applyTime})
+    </insert>
+
+    <update id="update" parameterType="com.volunteer.entity.ServiceHourReplenish">
+        UPDATE service_hour_replenish
+        SET activity_name = #{activityName},
+            hours = #{hours},
+            earned_points = #{earnedPoints},
+            reason = #{reason},
+            evidence_files = #{evidenceFiles},
+            status = #{status},
+            reject_reason = #{rejectReason},
+            admin_id = #{adminId},
+            audit_time = #{auditTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE service_hour_replenish
+        SET status = #{status},
+            reject_reason = #{rejectReason},
+            admin_id = #{adminId},
+            audit_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM service_hour_replenish WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDelete">
+        DELETE FROM service_hour_replenish WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计方法 -->
+    <select id="getTotalHoursByVolunteer" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(hours), 0) FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} AND status = '已通过'
+    </select>
+
+    <select id="getTotalPointsByVolunteer" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(earned_points), 0) FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} AND status = '已通过'
+    </select>
+
+    <select id="getCountByVolunteer" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} AND status = '已通过'
+    </select>
+
+    <!-- 管理员统计方法 -->
+    <select id="getTotalReplenishHours" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(hours), 0) 
+        FROM service_hour_replenish 
+        WHERE status = '已通过'
+    </select>
+
+    <select id="getHoursByDateRange" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(hours), 0) 
+        FROM service_hour_replenish 
+        WHERE status = '已通过'
+        AND create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <!-- 图表数据查询方法 - 补录时长统计 -->
+    <!-- 按日统计补录时长（按审核通过时间）-->
+    <select id="getDailyReplenishHours" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(audit_time, '%Y-%m-%d %H:00:00') as date,
+            HOUR(audit_time) as hour,
+            COALESCE(SUM(hours), 0) as hours
+        FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = '已通过'
+        AND audit_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(audit_time, '%Y-%m-%d %H:00:00'), HOUR(audit_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按周统计补录时长 -->
+    <select id="getWeeklyReplenishHours" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(audit_time, '%Y-%m-%d') as date,
+            DAYOFWEEK(audit_time) as dayOfWeek,
+            COALESCE(SUM(hours), 0) as hours
+        FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = '已通过'
+        AND audit_time >= DATE_SUB(NOW(), INTERVAL #{weeks} WEEK)
+        GROUP BY DATE_FORMAT(audit_time, '%Y-%m-%d'), DAYOFWEEK(audit_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按月统计补录时长 -->
+    <select id="getMonthlyReplenishHours" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(audit_time, '%Y-%m-%d') as date,
+            DAY(audit_time) as day,
+            COALESCE(SUM(hours), 0) as hours
+        FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = '已通过'
+        AND audit_time >= DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+        GROUP BY DATE_FORMAT(audit_time, '%Y-%m-%d'), DAY(audit_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按年统计补录时长 -->
+    <select id="getYearlyReplenishHours" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(audit_time, '%Y-%m') as month,
+            MONTH(audit_time) as monthNum,
+            COALESCE(SUM(hours), 0) as hours
+        FROM service_hour_replenish 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = '已通过'
+        AND audit_time >= DATE_SUB(NOW(), INTERVAL #{years} YEAR)
+        GROUP BY DATE_FORMAT(audit_time, '%Y-%m'), MONTH(audit_time)
+        ORDER BY month ASC
+    </select>
+    
+    <!-- 获取所有志愿者的补录积分总和 -->
+    <select id="getTotalReplenishPoints" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(earned_points), 0) 
+        FROM service_hour_replenish 
+        WHERE status = '已通过'
+    </select>
+
+</mapper>

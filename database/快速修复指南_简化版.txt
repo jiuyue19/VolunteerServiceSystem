@@ -1,0 +1,99 @@
+========================================
+志愿者服务系统 - 权限系统快速修复指南（简化版）
+========================================
+
+问题：登录时提示 "admin_permission 表不存在"
+
+原因：系统使用 admin.permissions 字段存储权限，不需要 admin_permission 表
+
+解决步骤（3步搞定）：
+-----------
+
+步骤1: 执行SQL创建权限定义表
+   
+   文件：database/fix_permission_system_simple.sql
+   
+   使用Navicat：
+   - 打开SQL文件
+   - 点击"运行"按钮
+   
+   使用命令行：
+   mysql -u root -p volunteer_system < database/fix_permission_system_simple.sql
+
+步骤2: 验证创建成功
+   
+   执行SQL查看：
+   SELECT COUNT(*) FROM permission;
+   
+   应该显示：23
+
+步骤3: 重启后端服务
+   
+   重新登录即可！
+
+完成！
+-----------
+
+权限分配方式：
+-----------
+
+方式1：通过SQL直接分配（推荐用于测试）
+
+   -- 为管理员分配权限
+   UPDATE admin 
+   SET permissions = '["volunteers", "activities", "forum"]' 
+   WHERE username = 'test_admin';
+
+方式2：通过管理界面分配（待实现）
+
+   1. 超级管理员登录
+   2. 进入管理员管理页面
+   3. 编辑管理员
+   4. 勾选权限
+   5. 保存
+
+权限格式示例：
+-----------
+
+正确格式（JSON数组）：
+'["volunteers", "activities", "applications"]'
+
+错误格式：
+'volunteers,activities'  ❌ 不是JSON
+"['volunteers']"         ❌ 单引号
+["volunteers"]           ❌ 没有外层引号
+
+常用权限组合：
+-----------
+
+志愿者管理员：
+'["volunteers", "applications", "checkins", "replenish"]'
+
+活动管理员：
+'["activities", "categories", "forum", "comments"]'
+
+审核管理员：
+'["applications", "checkins", "replenish"]'
+
+全部权限（除管理员管理）：
+'["volunteers", "activities", "categories", "forum", "post-categories", "banners", "comments", "announcements", "applications", "checkins", "replenish", "goods", "orders", "blockchain-query", "blockchain", "certificate-library"]'
+
+特别说明：
+-----------
+
+1. 超级管理员（role = 'SUPER_ADMIN'）自动拥有所有权限
+   permissions 字段可以为 NULL
+
+2. 普通管理员（role = 'ADMIN'）需要配置 permissions 字段
+
+3. 志愿者管理特殊权限：
+   - 普通管理员：只能查看、添加、删除
+   - 超级管理员：可以修改志愿者信息
+
+4. 修改权限后必须重新登录！
+
+详细说明：
+database/权限系统修复说明_简化版.md
+
+
+

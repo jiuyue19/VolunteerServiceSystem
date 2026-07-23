@@ -1,0 +1,82 @@
+# ======================
+# Java / Spring Boot
+# ======================
+
+*.class
+
+target/
+
+*.jar
+*.war
+*.nar
+*.ear
+
+*.log
+
+
+# ======================
+# IntelliJ IDEA
+# ======================
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+
+# ======================
+# Node / Vue
+# ======================
+
+node_modules/
+
+dist/
+
+.npm/
+.pnpm-store/
+
+
+# ======================
+# Environment
+# ======================
+
+.env
+.env.*
+!.env.example
+
+
+# ======================
+# Blockchain / Hardhat
+# ======================
+
+cache/
+
+artifacts/
+
+coverage/
+
+
+# ======================
+# OS
+# ======================
+
+.DS_Store
+
+Thumbs.db
+
+
+# ======================
+# Temporary
+# ======================
+
+*.tmp
+
+*.temp
+
+
+# ======================
+# Upload files
+# ======================
+
+uploads/*
+!uploads/.gitkeep

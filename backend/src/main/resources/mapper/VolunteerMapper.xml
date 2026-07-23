@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.VolunteerMapper">
+    
+    <select id="selectByUsername" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer WHERE username = #{username}
+    </select>
+    
+    <select id="selectById" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer WHERE id = #{id}
+    </select>
+    
+    <select id="selectAll" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectByIds" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO volunteer (username, password, real_name, gender, phone, email, id_card, avatar, province, city, district, total_hours, points, certification_status, wallet_address, status, detailed_address, latitude, longitude)
+        VALUES (#{username}, #{password}, #{realName}, #{gender}, #{phone}, #{email}, #{idCard}, #{avatar}, #{province}, #{city}, #{district}, #{totalHours}, #{points}, #{certificationStatus}, #{walletAddress}, #{status}, #{detailedAddress}, #{latitude}, #{longitude})
+    </insert>
+    
+    <update id="update">
+        UPDATE volunteer
+        <set>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="detailedAddress != null">detailed_address = #{detailedAddress},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="certificationStatus != null">certification_status = #{certificationStatus},</if>
+            <if test="walletAddress != null">wallet_address = #{walletAddress},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <update id="resetStats">
+        UPDATE volunteer SET total_hours = 0, points = 0 WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM volunteer WHERE id = #{id}
+    </delete>
+    
+    <select id="selectByPhone" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer WHERE phone = #{phone}
+    </select>
+    
+    <select id="selectByEmail" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime FROM volunteer WHERE email = #{email}
+    </select>
+    
+    <update id="updatePassword">
+        UPDATE volunteer SET password = #{password} WHERE id = #{id}
+    </update>
+    
+    <!-- 区块链统计相关 -->
+    <select id="countVolunteersWithWallet" resultType="int">
+        SELECT COUNT(*) FROM volunteer WHERE wallet_address IS NOT NULL AND wallet_address != ''
+    </select>
+    
+    <select id="sumTotalHours" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_hours), 0) FROM volunteer
+    </select>
+    
+    <select id="selectVolunteersWithWallet" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime 
+        FROM volunteer 
+        WHERE wallet_address IS NOT NULL AND wallet_address != ''
+        ORDER BY create_time DESC
+    </select>
+    
+    <select id="selectByWalletAddress" resultType="com.volunteer.entity.Volunteer">
+        SELECT id, username, password, real_name as realName, gender, phone, email, id_card as idCard, avatar, province, city, district, detailed_address as detailedAddress, latitude, longitude, total_hours as totalHours, points, certification_status as certificationStatus, wallet_address as walletAddress, status, create_time as createdAt, update_time as updateTime 
+        FROM volunteer 
+        WHERE wallet_address = #{walletAddress}
+    </select>
+    
+    <!-- 积分同步：直接设置积分值，不是累加 -->
+    <update id="syncPoints">
+        UPDATE volunteer SET points = #{points} WHERE id = #{id}
+    </update>
+    
+    <!-- 时长同步：直接设置时长值，不是累加 -->
+    <update id="syncHours">
+        UPDATE volunteer SET total_hours = #{hours} WHERE id = #{id}
+    </update>
+    
+    <!-- 获取所有志愿者ID -->
+    <select id="selectAllVolunteerIds" resultType="java.lang.Long">
+        SELECT id FROM volunteer ORDER BY id
+    </select>
+
+    <!-- 管理员统计方法 -->
+    <select id="getTotalPoints" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(points), 0) FROM volunteer
+    </select>
+    
+    <select id="getTotalHours" resultType="java.lang.Double">
+        SELECT COALESCE(
+            (SELECT SUM(service_hours) FROM activity_checkin WHERE status = 2 AND is_counted = 1) +
+            (SELECT SUM(hours) FROM service_hour_replenish WHERE status = '已通过'),
+            0
+        ) AS total_hours
+    </select>
+
+    <select id="getTopByPoints" resultType="com.volunteer.entity.Volunteer">
+        SELECT * FROM volunteer 
+        ORDER BY points DESC 
+        LIMIT #{limit}
+    </select>
+
+</mapper>

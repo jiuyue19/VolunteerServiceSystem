@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: volunteer-system
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/volunteer_system?useUnicode=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: 3513624256@qq.com   
+    password: ecnytpbhvhnmcjad
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+
+aliyun:
+  sms:
+    access-key-id: your-access-key-id        # TODO: 替换为你的阿里云 AccessKeyId
+    access-key-secret: your-access-key-secret # TODO: 替换为你的阿里云 AccessKeySecret
+    region-id: cn-hangzhou                   # 一般为 cn-hangzhou
+    sign-name: your-sms-sign                 # TODO: 替换为你在阿里云短信控制台配置的签名
+    template-code: your-sms-template-code    # TODO: 替换为重置密码验证码的模板CODE
+
+# 文件上传配置
+file:
+  upload:
+    path: E:/毕业设计/VolunteerServiceSystem/uploads/
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.volunteer.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 8080
+
+jwt:
+  secret: volunteer-system-secret-key-2024
+  expiration: 7200000
+  refresh-expiration: 259200000
+
+blockchain:
+  contract-address: "0xfdD7032F12212b0a38a72374259ed4509bbdbfB7"
+  rpc-url: http://127.0.0.1:8545
+  admin-private-key: "f34c6c230f0317e3a3584cc306bebf78ec1372d207b56f5c4d64a9d214d89114"
+  chain-id: 2025

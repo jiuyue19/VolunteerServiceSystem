@@ -1,0 +1,48 @@
+========================================
+志愿者服务系统 - 权限系统快速修复指南
+========================================
+
+问题：登录时提示 "admin_permission 表不存在"
+
+解决步骤：
+-----------
+
+1. 打开MySQL客户端（Navicat、MySQL Workbench等）
+
+2. 连接到数据库 volunteer_system
+
+3. 执行SQL文件：
+   文件位置：database/fix_permission_system.sql
+   
+   方式1：图形化工具
+   - 打开该SQL文件
+   - 点击"运行"按钮
+   
+   方式2：命令行
+   mysql -u root -p volunteer_system < database/fix_permission_system.sql
+
+4. 验证创建成功：
+   执行以下SQL查看权限数量：
+   
+   SELECT COUNT(*) FROM permission;
+   
+   应该显示：23
+
+5. 重启后端服务
+
+6. 重新登录管理员账号
+
+完成！
+-----------
+
+说明：
+- 该脚本会创建 permission 和 admin_permission 两个表
+- 初始化23个基础权限
+- 超级管理员自动拥有所有权限
+- 普通管理员需要通过超级管理员分配权限
+
+详细说明请参考：database/权限系统修复说明.md
+
+
+
+

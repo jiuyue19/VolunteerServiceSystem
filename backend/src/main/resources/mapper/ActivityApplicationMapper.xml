@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ActivityApplicationMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.ActivityApplication">
+        <id property="id" column="id"/>
+        <result property="activityId" column="activity_id"/>
+        <result property="volunteerId" column="volunteer_id"/>
+        <result property="status" column="status"/>
+        <result property="reason" column="reason"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="activityName" column="activity_name"/>
+        <result property="volunteerName" column="volunteer_name"/>
+        <result property="activityAddress" column="activity_address"/>
+        <result property="activityStartTime" column="activity_start_time"/>
+        <result property="activityEndTime" column="activity_end_time"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT aa.*, a.title as activity_name, v.username as volunteer_name,
+               a.address as activity_address, a.start_time as activity_start_time, a.end_time as activity_end_time
+        FROM activity_application aa
+        LEFT JOIN activity a ON aa.activity_id = a.id
+        LEFT JOIN volunteer v ON aa.volunteer_id = v.id
+        WHERE aa.id = #{id}
+    </select>
+
+    <select id="selectByVolunteerId" resultMap="BaseResultMap">
+        SELECT aa.*, a.title as activity_name, v.username as volunteer_name,
+               a.address as activity_address, a.start_time as activity_start_time, a.end_time as activity_end_time
+        FROM activity_application aa
+        LEFT JOIN activity a ON aa.activity_id = a.id
+        LEFT JOIN volunteer v ON aa.volunteer_id = v.id
+        WHERE aa.volunteer_id = #{volunteerId} ORDER BY aa.apply_time DESC
+    </select>
+
+    <select id="selectByActivityId" resultMap="BaseResultMap">
+        SELECT aa.*, a.title as activity_name, v.username as volunteer_name,
+               a.address as activity_address, a.start_time as activity_start_time, a.end_time as activity_end_time
+        FROM activity_application aa
+        LEFT JOIN activity a ON aa.activity_id = a.id
+        LEFT JOIN volunteer v ON aa.volunteer_id = v.id
+        WHERE aa.activity_id = #{activityId} ORDER BY aa.apply_time DESC
+    </select>
+    
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT aa.*, a.title as activity_name, v.username as volunteer_name,
+               a.address as activity_address, a.start_time as activity_start_time, a.end_time as activity_end_time
+        FROM activity_application aa
+        LEFT JOIN activity a ON aa.activity_id = a.id
+        LEFT JOIN volunteer v ON aa.volunteer_id = v.id
+        ORDER BY aa.apply_time DESC
+    </select>
+
+    <select id="selectByActivityAndVolunteer" resultMap="BaseResultMap">
+        SELECT * FROM activity_application
+        WHERE activity_id = #{activityId} AND volunteer_id = #{volunteerId}
+        LIMIT 1
+    </select>
+
+    <select id="selectParticipatingVolunteerIds" resultType="java.lang.Long">
+        SELECT volunteer_id FROM activity_application
+        WHERE activity_id = #{activityId}
+          AND (status = '待参与' OR status = '已通过')
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.ActivityApplication" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity_application (activity_id, volunteer_id, status, reason, reject_reason, apply_time)
+        VALUES (#{activityId}, #{volunteerId}, #{status}, #{reason}, #{rejectReason}, #{applyTime})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE activity_application
+        SET status = #{status},
+            reject_reason = #{rejectReason}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateAuditTime">
+        UPDATE activity_application
+        SET audit_time = #{auditTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM activity_application WHERE id = #{id}
+    </delete>
+
+    <!-- 管理员统计方法 -->
+    <select id="countParticipantsByCategory" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT aa.volunteer_id)
+        FROM activity_application aa
+        INNER JOIN activity a ON aa.activity_id = a.id
+        WHERE a.category_id = #{categoryId}
+        AND aa.status = '已通过'
+    </select>
+    
+    <!-- 获取志愿者通过审核的申请总数 -->
+    <select id="getApprovedApplicationCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_application 
+        WHERE volunteer_id = #{volunteerId}
+        AND status = '已通过'
+    </select>
+    
+    <!-- 获取志愿者参与的活动类型数量（去重）-->
+    <select id="getActivityTypeCoverage" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT a.category_id)
+        FROM activity_application app
+        INNER JOIN activity a ON app.activity_id = a.id
+        WHERE app.volunteer_id = #{volunteerId}
+        AND app.status = '已通过'
+    </select>
+    
+    <!-- 全局统计方法 -->
+    <!-- 获取所有志愿者的通过审核申请总数 -->
+    <select id="getTotalApprovedApplications" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_application 
+        WHERE status = '已通过'
+    </select>
+
+</mapper>

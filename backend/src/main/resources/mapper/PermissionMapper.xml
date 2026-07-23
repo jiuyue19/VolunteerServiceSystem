@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.PermissionMapper">
+    
+    <select id="selectAll" resultType="com.volunteer.entity.Permission">
+        SELECT id, permission_key as permissionKey, permission_name as permissionName,
+               permission_type as permissionType, parent_id as parentId, path, icon,
+               sort_order as sortOrder, status, description, create_time as createTime
+        FROM permission
+        WHERE status = 1
+        ORDER BY sort_order ASC
+    </select>
+    
+    <select id="selectByAdminId" resultType="com.volunteer.entity.Permission">
+        SELECT DISTINCT p.id, p.permission_key as permissionKey, p.permission_name as permissionName,
+               p.permission_type as permissionType, p.parent_id as parentId, p.path, p.icon,
+               p.sort_order as sortOrder, p.status, p.description, p.create_time as createTime
+        FROM permission p
+        INNER JOIN admin_permission ap ON p.id = ap.permission_id
+        WHERE ap.admin_id = #{adminId} AND p.status = 1
+        ORDER BY p.sort_order ASC
+    </select>
+    
+    <select id="selectById" resultType="com.volunteer.entity.Permission">
+        SELECT id, permission_key as permissionKey, permission_name as permissionName,
+               permission_type as permissionType, parent_id as parentId, path, icon,
+               sort_order as sortOrder, status, description, create_time as createTime
+        FROM permission
+        WHERE id = #{id}
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO permission (permission_key, permission_name, permission_type, parent_id,
+                               path, icon, sort_order, status, description)
+        VALUES (#{permissionKey}, #{permissionName}, #{permissionType}, #{parentId},
+                #{path}, #{icon}, #{sortOrder}, #{status}, #{description})
+    </insert>
+    
+    <update id="update">
+        UPDATE permission
+        <set>
+            <if test="permissionKey != null">permission_key = #{permissionKey},</if>
+            <if test="permissionName != null">permission_name = #{permissionName},</if>
+            <if test="permissionType != null">permission_type = #{permissionType},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="path != null">path = #{path},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM permission WHERE id = #{id}
+    </delete>
+    
+    <insert id="batchInsertAdminPermissions">
+        INSERT INTO admin_permission (admin_id, permission_id)
+        VALUES
+        <foreach collection="permissionIds" item="permissionId" separator=",">
+            (#{adminId}, #{permissionId})
+        </foreach>
+    </insert>
+    
+    <delete id="deleteAdminPermissions">
+        DELETE FROM admin_permission WHERE admin_id = #{adminId}
+    </delete>
+    
+</mapper>

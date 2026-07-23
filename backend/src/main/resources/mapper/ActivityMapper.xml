@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ActivityMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.Activity">
+        <id property="id" column="id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="address" column="address"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="targetNumber" column="target_number"/>
+        <result property="currentNumber" column="current_number"/>
+        <result property="serviceHours" column="service_hours"/>
+        <result property="rewardPoints" column="reward_points"/>
+        <result property="status" column="status"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="venueImage" column="venue_image"/>
+        <result property="createdAt" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="detailedAddress" column="detailed_address"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="volunteerField" column="volunteer_field"/>
+        <result property="volunteerTarget" column="volunteer_target"/>
+        <result property="serviceLocation" column="service_location"/>
+        <result property="organizationName" column="organization_name"/>
+        <result property="organizationImage" column="organization_image"/>
+        <result property="contactPerson" column="contact_person"/>
+        <result property="contactPhone" column="contact_phone"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM activity WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM activity ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByCategory" resultMap="BaseResultMap">
+        SELECT * FROM activity WHERE category_id = #{categoryId} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT * FROM activity WHERE status = #{status} ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByFilter" resultMap="BaseResultMap">
+        SELECT * FROM activity
+        <where>
+            <if test="date != null and date != ''">
+                AND DATE(start_time) = #{date}
+            </if>
+            <if test="province != null and province != ''">
+                AND address LIKE CONCAT('%', #{province}, '%')
+            </if>
+            <if test="city != null and city != ''">
+                AND address LIKE CONCAT('%', #{city}, '%')
+            </if>
+            <if test="district != null and district != ''">
+                AND address LIKE CONCAT('%', #{district}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.Activity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity (category_id, title, content, address, start_time, end_time, target_number, current_number, service_hours, reward_points, status, cover_image, venue_image, detailed_address, latitude, longitude, volunteer_field, volunteer_target, service_location, organization_name, organization_image, contact_person, contact_phone)
+        VALUES (#{categoryId}, #{title}, #{content}, #{address}, #{startTime}, #{endTime}, #{targetNumber}, #{currentNumber}, #{serviceHours}, #{rewardPoints}, #{status}, #{coverImage}, #{venueImage}, #{detailedAddress}, #{latitude}, #{longitude}, #{volunteerField}, #{volunteerTarget}, #{serviceLocation}, #{organizationName}, #{organizationImage}, #{contactPerson}, #{contactPhone})
+    </insert>
+
+    <update id="update" parameterType="com.volunteer.entity.Activity">
+        UPDATE activity
+        SET category_id = #{categoryId},
+            title = #{title},
+            content = #{content},
+            address = #{address},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            target_number = #{targetNumber},
+            current_number = #{currentNumber},
+            service_hours = #{serviceHours},
+            reward_points = #{rewardPoints},
+            status = #{status},
+            cover_image = #{coverImage},
+            venue_image = #{venueImage},
+            detailed_address = #{detailedAddress},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            volunteer_field = #{volunteerField},
+            volunteer_target = #{volunteerTarget},
+            service_location = #{serviceLocation},
+            organization_name = #{organizationName},
+            organization_image = #{organizationImage},
+            contact_person = #{contactPerson},
+            contact_phone = #{contactPhone}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateCurrentNumber">
+        UPDATE activity SET current_number = #{number} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM activity WHERE id = #{id}
+    </delete>
+
+    <select id="selectByTitle" resultMap="BaseResultMap">
+        SELECT * FROM activity WHERE title = #{title} LIMIT 1
+    </select>
+
+    <!-- 管理员统计方法 -->
+    <select id="countAll" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM activity
+    </select>
+
+    <select id="countByCategory" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM activity WHERE category_id = #{categoryId}
+    </select>
+
+</mapper>

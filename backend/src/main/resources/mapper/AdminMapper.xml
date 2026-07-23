@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.AdminMapper">
+    
+    <select id="selectByUsername" resultType="com.volunteer.entity.Admin">
+        SELECT id, username, password, name, phone, email, avatar, role, status, permissions, create_time as createdAt, update_time as updateTime FROM admin WHERE username = #{username}
+    </select>
+    
+    <select id="selectById" resultType="com.volunteer.entity.Admin">
+        SELECT id, username, password, name, phone, email, avatar, role, status, permissions, create_time as createdAt, update_time as updateTime FROM admin WHERE id = #{id}
+    </select>
+    
+    <select id="selectAll" resultType="com.volunteer.entity.Admin">
+        SELECT id, username, password, name, phone, email, avatar, role, status, permissions, create_time as createdAt, update_time as updateTime FROM admin ORDER BY create_time DESC
+    </select>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin (username, password, name, phone, email, avatar, role, status, permissions)
+        VALUES (#{username}, #{password}, #{name}, #{phone}, #{email}, #{avatar}, #{role}, #{status}, #{permissions})
+    </insert>
+    
+    <update id="update">
+        UPDATE admin
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="permissions != null">permissions = #{permissions},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById">
+        DELETE FROM admin WHERE id = #{id}
+    </delete>
+    
+</mapper>

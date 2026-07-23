@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ActivityCheckinMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.ActivityCheckin">
+        <id property="id" column="id"/>
+        <result property="activityId" column="activity_id"/>
+        <result property="volunteerId" column="volunteer_id"/>
+        <result property="checkinTime" column="checkin_time"/>
+        <result property="checkoutTime" column="checkout_time"/>
+        <result property="serviceHours" column="service_hours"/>
+        <result property="earnedPoints" column="earned_points"/>
+        <result property="checkinType" column="checkin_type"/>
+        <result property="location" column="location"/>
+        <result property="status" column="status"/>
+        <result property="isValid" column="is_valid"/>
+        <result property="isCounted" column="is_counted"/>
+        <result property="remark" column="remark"/>
+        <result property="createdAt" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM activity_checkin ORDER BY create_time DESC
+    </select>
+
+    <select id="selectCheckoutRecords" resultType="java.util.Map">
+        SELECT 
+            ac.id,
+            ac.activity_id AS activityId,
+            ac.volunteer_id AS volunteerId,
+            ac.checkin_time AS checkinTime,
+            ac.checkout_time AS checkoutTime,
+            ac.service_hours AS serviceHours,
+            ac.earned_points AS earnedPoints,
+            ac.status,
+            ac.remark,
+            v.real_name AS volunteerName,
+            a.title AS activityName
+        FROM activity_checkin ac
+        LEFT JOIN volunteer v ON ac.volunteer_id = v.id
+        LEFT JOIN activity a ON ac.activity_id = a.id
+        ORDER BY ac.create_time DESC
+    </select>
+
+    <select id="selectByVolunteerId" resultMap="BaseResultMap">
+        SELECT * FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByActivityAndVolunteer" resultType="com.volunteer.entity.ActivityCheckin">
+        SELECT * FROM activity_checkin 
+        WHERE activity_id = #{activityId} AND volunteer_id = #{volunteerId}
+    </select>
+    
+    <select id="getTotalHoursByVolunteer" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(service_hours), 0) FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} AND status = 2
+    </select>
+    
+    <select id="getTotalPointsByVolunteer" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(earned_points), 0) FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} AND status = 2 AND is_counted = 1
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.ActivityCheckin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity_checkin (activity_id, volunteer_id, checkin_time, checkout_time, service_hours, earned_points, status, is_valid, is_counted, remark, create_time, update_time)
+        VALUES (#{activityId}, #{volunteerId}, #{checkinTime}, #{checkoutTime}, #{serviceHours}, #{earnedPoints}, #{status}, #{isValid}, #{isCounted}, #{remark}, #{createdAt}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="com.volunteer.entity.ActivityCheckin">
+        UPDATE activity_checkin
+        SET activity_id = #{activityId},
+            volunteer_id = #{volunteerId},
+            checkin_time = #{checkinTime},
+            checkout_time = #{checkoutTime},
+            service_hours = #{serviceHours},
+            earned_points = #{earnedPoints},
+            status = #{status},
+            is_valid = #{isValid},
+            is_counted = #{isCounted},
+            remark = #{remark},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM activity_checkin WHERE id = #{id}
+    </delete>
+
+    <!-- 管理员统计方法 -->
+    <select id="getTotalServiceHours" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(service_hours), 0) 
+        FROM activity_checkin 
+        WHERE checkout_time IS NOT NULL
+    </select>
+
+    <select id="getHoursByDateRange" resultType="java.lang.Double">
+        SELECT COALESCE(SUM(service_hours), 0) 
+        FROM activity_checkin 
+        WHERE checkout_time IS NOT NULL
+        AND checkout_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <!-- 图表数据查询方法 -->
+    <!-- 按日统计志愿者服务时长（用于成长轨迹图 - 最近24小时）-->
+    <select id="getDailyHoursByVolunteer" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(checkout_time, '%Y-%m-%d %H:00:00') as date,
+            HOUR(checkout_time) as hour,
+            COALESCE(SUM(service_hours), 0) as hours
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = 2 
+        AND is_counted = 1
+        AND checkout_time >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(checkout_time, '%Y-%m-%d %H:00:00'), HOUR(checkout_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按周统计志愿者服务时长（最近7天，按星期几分组）-->
+    <select id="getWeeklyHoursByVolunteer" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(checkout_time, '%Y-%m-%d') as date,
+            DAYOFWEEK(checkout_time) as dayOfWeek,
+            COALESCE(SUM(service_hours), 0) as hours
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = 2 
+        AND is_counted = 1
+        AND checkout_time >= DATE_SUB(NOW(), INTERVAL #{weeks} WEEK)
+        GROUP BY DATE_FORMAT(checkout_time, '%Y-%m-%d'), DAYOFWEEK(checkout_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按月统计志愿者服务时长（当月每天）-->
+    <select id="getMonthlyHoursByVolunteer" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(checkout_time, '%Y-%m-%d') as date,
+            DAY(checkout_time) as day,
+            COALESCE(SUM(service_hours), 0) as hours
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = 2 
+        AND is_counted = 1
+        AND checkout_time >= DATE_SUB(NOW(), INTERVAL #{months} MONTH)
+        GROUP BY DATE_FORMAT(checkout_time, '%Y-%m-%d'), DAY(checkout_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 按年统计志愿者服务时长（最近12个月）-->
+    <select id="getYearlyHoursByVolunteer" resultType="java.util.HashMap">
+        SELECT 
+            DATE_FORMAT(checkout_time, '%Y-%m') as month,
+            MONTH(checkout_time) as monthNum,
+            COALESCE(SUM(service_hours), 0) as hours
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId} 
+        AND status = 2 
+        AND is_counted = 1
+        AND checkout_time >= DATE_SUB(NOW(), INTERVAL #{years} YEAR)
+        GROUP BY DATE_FORMAT(checkout_time, '%Y-%m'), MONTH(checkout_time)
+        ORDER BY month ASC
+    </select>
+    
+    <!-- 获取志愿者参与的活动总数（去重）-->
+    <select id="getActivityCountByVolunteer" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT activity_id) 
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId}
+        AND status = 2
+        AND is_counted = 1
+    </select>
+    
+    <!-- 获取志愿者准时签到次数 -->
+    <select id="getOnTimeCheckinCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_checkin ac
+        JOIN activity a ON ac.activity_id = a.id
+        WHERE ac.volunteer_id = #{volunteerId}
+        AND ac.checkin_time IS NOT NULL
+        AND ABS(TIMESTAMPDIFF(MINUTE, ac.checkin_time, a.start_time)) &lt;= 30
+    </select>
+    
+    <!-- 获取志愿者总签到次数 -->
+    <select id="getTotalCheckinCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_checkin 
+        WHERE volunteer_id = #{volunteerId}
+        AND status = 2
+        AND is_counted = 1
+    </select>
+
+    <!-- 全局统计方法 -->
+    <!-- 获取所有志愿者的准时签到总次数 -->
+    <select id="getTotalOnTimeCheckins" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_checkin ac
+        INNER JOIN activity a ON ac.activity_id = a.id
+        WHERE ac.status = 2 
+        AND ac.is_counted = 1
+        AND ac.checkin_time IS NOT NULL
+        AND ABS(TIMESTAMPDIFF(MINUTE, ac.checkin_time, a.start_time)) &lt;= 30
+    </select>
+    
+    <!-- 获取所有志愿者的正常签退总次数 -->
+    <select id="getTotalCompletedCheckins" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM activity_checkin 
+        WHERE status = 2 
+        AND is_counted = 1
+    </select>
+    
+    <!-- 获取所有志愿者的签到积分总和 -->
+    <select id="getTotalCheckinPoints" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(earned_points), 0) 
+        FROM activity_checkin 
+        WHERE status = 2 
+        AND is_counted = 1
+    </select>
+
+</mapper>

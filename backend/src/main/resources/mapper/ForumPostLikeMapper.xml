@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ForumPostLikeMapper">
+    <insert id="insert">
+        INSERT IGNORE INTO forum_post_like (post_id, volunteer_id)
+        VALUES (#{postId}, #{volunteerId})
+    </insert>
+    <delete id="delete">
+        DELETE FROM forum_post_like WHERE post_id = #{postId} AND volunteer_id = #{volunteerId}
+    </delete>
+    <select id="countByPost" resultType="int">
+        SELECT COUNT(1) FROM forum_post_like WHERE post_id = #{postId}
+    </select>
+    <select id="exists" resultType="int">
+        SELECT COUNT(1) FROM forum_post_like WHERE post_id = #{postId} AND volunteer_id = #{volunteerId}
+    </select>
+</mapper>

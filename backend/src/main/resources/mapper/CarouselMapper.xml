@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.CarouselMapper">
+    <select id="selectAll" resultType="com.volunteer.entity.Carousel">
+        SELECT id, 
+               COALESCE(title, CONCAT('轮播图', id)) as title,
+               image, 
+               COALESCE(link, '') as link, 
+               activity_id as activityId, 
+               sort, 
+               COALESCE(status, 1) as status, 
+               create_time as createdAt 
+        FROM carousel ORDER BY sort ASC, id DESC
+    </select>
+    <select id="selectById" resultType="com.volunteer.entity.Carousel">
+        SELECT id, 
+               COALESCE(title, CONCAT('轮播图', id)) as title,
+               image, 
+               COALESCE(link, '') as link, 
+               activity_id as activityId, 
+               sort, 
+               COALESCE(status, 1) as status, 
+               create_time as createdAt 
+        FROM carousel WHERE id = #{id}
+    </select>
+    <insert id="insert">
+        INSERT INTO carousel (title, image, link, activity_id, sort, status, create_time) 
+        VALUES (#{title}, #{image}, #{link}, #{activityId}, #{sort}, #{status}, NOW())
+    </insert>
+    <update id="update">
+        UPDATE carousel SET title = #{title}, image = #{image}, link = #{link}, activity_id = #{activityId}, sort = #{sort}, status = #{status} 
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM carousel WHERE id = #{id}
+    </delete>
+</mapper>

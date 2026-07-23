@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.CommentMapper">
+    <select id="selectAll" resultType="com.volunteer.entity.Comment">
+        SELECT c.id, c.volunteer_id as volunteerId, c.target_type as targetType, c.target_id as targetId,
+               c.content, c.create_time as createdAt, c.parent_id as parentId,
+               v.username as userName, v.avatar as avatar,
+               CASE
+                   WHEN c.target_type = '活动' THEN a.title
+                   WHEN c.target_type = '帖子' THEN p.title
+               END as postTitle
+        FROM comment c
+        LEFT JOIN volunteer v ON c.volunteer_id = v.id
+        LEFT JOIN activity a ON c.target_type = '活动' AND c.target_id = a.id
+        LEFT JOIN forum_post p ON c.target_type = '帖子' AND c.target_id = p.id
+        ORDER BY c.id DESC
+    </select>
+    <select id="selectById" resultType="com.volunteer.entity.Comment">
+        SELECT id, volunteer_id as volunteerId, target_type as targetType, target_id as targetId,
+               content, create_time as createdAt, parent_id as parentId
+        FROM comment WHERE id = #{id}
+    </select>
+    <select id="selectByTarget" resultType="com.volunteer.entity.Comment">
+        SELECT c.id, c.volunteer_id as volunteerId, c.target_type as targetType, c.target_id as targetId,
+               c.content, c.create_time as createdAt, c.parent_id as parentId,
+               v.username as userName, v.avatar as avatar,
+               COALESCE(c.likes, 0) as likes,
+               CASE 
+                   WHEN #{volunteerId} IS NOT NULL AND c.liked_by IS NOT NULL 
+                   AND FIND_IN_SET(CAST(#{volunteerId} AS CHAR), c.liked_by COLLATE utf8mb4_general_ci) > 0 
+                   THEN 1 ELSE 0 
+               END as liked,
+               CASE
+                   WHEN c.target_type = '活动' THEN a.title
+                   WHEN c.target_type = '帖子' THEN p.title
+               END as postTitle
+        FROM comment c
+        LEFT JOIN volunteer v ON c.volunteer_id = v.id
+        LEFT JOIN activity a ON c.target_type = '活动' AND c.target_id = a.id
+        LEFT JOIN forum_post p ON c.target_type = '帖子' AND c.target_id = p.id
+        WHERE c.target_type = #{targetType} AND c.target_id = #{targetId}
+        ORDER BY c.id ASC
+    </select>
+    <insert id="insert">
+        INSERT INTO comment (volunteer_id, target_type, target_id, content, parent_id)
+        VALUES (#{volunteerId}, #{targetType}, #{targetId}, #{content}, #{parentId})
+    </insert>
+    <update id="update">
+        UPDATE comment SET content = #{content} WHERE id = #{id}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM comment WHERE id = #{id}
+    </delete>
+    
+    <update id="insertLike">
+        UPDATE comment 
+        SET likes = COALESCE(likes, 0) + 1,
+            liked_by = CASE 
+                WHEN liked_by IS NULL OR liked_by = '' 
+                THEN CAST(#{volunteerId} AS CHAR)
+                ELSE CONCAT(liked_by, ',', CAST(#{volunteerId} AS CHAR))
+            END
+        WHERE id = #{commentId}
+        AND (liked_by IS NULL OR FIND_IN_SET(CAST(#{volunteerId} AS CHAR), liked_by COLLATE utf8mb4_general_ci) = 0)
+    </update>
+    
+    <update id="deleteLike">
+        UPDATE comment 
+        SET likes = GREATEST(COALESCE(likes, 0) - 1, 0),
+            liked_by = CASE 
+                WHEN liked_by = CAST(#{volunteerId} AS CHAR) THEN NULL
+                WHEN liked_by LIKE CONCAT(CAST(#{volunteerId} AS CHAR), ',%') THEN SUBSTRING(liked_by, LENGTH(CAST(#{volunteerId} AS CHAR)) + 2)
+                WHEN liked_by LIKE CONCAT('%,', CAST(#{volunteerId} AS CHAR)) THEN SUBSTRING(liked_by, 1, LENGTH(liked_by) - LENGTH(CAST(#{volunteerId} AS CHAR)) - 1)
+                WHEN liked_by LIKE CONCAT('%,', CAST(#{volunteerId} AS CHAR), ',%') THEN REPLACE(liked_by, CONCAT(',', CAST(#{volunteerId} AS CHAR), ','), ',')
+                ELSE liked_by
+            END
+        WHERE id = #{commentId}
+        AND liked_by IS NOT NULL 
+        AND FIND_IN_SET(CAST(#{volunteerId} AS CHAR), liked_by COLLATE utf8mb4_general_ci) > 0
+    </update>
+    
+    <select id="selectByVolunteerId" resultType="com.volunteer.entity.Comment">
+        SELECT c.id, c.volunteer_id as volunteerId, c.target_type as targetType, c.target_id as targetId,
+               c.content, c.create_time as createdAt, c.parent_id as parentId,
+               v.username as userName, v.avatar as avatar,
+               COALESCE(c.likes, 0) as likes,
+               CASE
+                   WHEN c.target_type = '活动' THEN a.title
+                   WHEN c.target_type = '帖子' THEN p.title
+               END as postTitle
+        FROM comment c
+        LEFT JOIN volunteer v ON c.volunteer_id = v.id
+        LEFT JOIN activity a ON c.target_type = '活动' AND c.target_id = a.id
+        LEFT JOIN forum_post p ON c.target_type = '帖子' AND c.target_id = p.id
+        WHERE c.volunteer_id = #{volunteerId}
+        ORDER BY c.create_time DESC
+    </select>
+</mapper>

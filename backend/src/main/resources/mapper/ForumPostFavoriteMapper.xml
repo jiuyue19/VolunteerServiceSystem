@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ForumPostFavoriteMapper">
+    <insert id="insert">
+        INSERT IGNORE INTO forum_post_favorite (post_id, volunteer_id)
+        VALUES (#{postId}, #{volunteerId})
+    </insert>
+    <delete id="delete">
+        DELETE FROM forum_post_favorite WHERE post_id = #{postId} AND volunteer_id = #{volunteerId}
+    </delete>
+    <select id="countByPost" resultType="int">
+        SELECT COUNT(1) FROM forum_post_favorite WHERE post_id = #{postId}
+    </select>
+    <select id="exists" resultType="int">
+        SELECT COUNT(1) FROM forum_post_favorite WHERE post_id = #{postId} AND volunteer_id = #{volunteerId}
+    </select>
+    
+    <!-- 管理员获取所有收藏记录 -->
+    <select id="getAllFavoritesForAdmin" resultType="map">
+        SELECT 
+            fpf.id,
+            fpf.post_id AS postId,
+            fp.title AS postTitle,
+            fc.name AS postCategory,
+            fp.status AS postStatus,
+            fpf.volunteer_id AS volunteerId,
+            v.real_name AS volunteerName,
+            v.phone AS volunteerPhone,
+            v.email AS volunteerEmail,
+            fpf.created_at AS favoriteTime
+        FROM forum_post_favorite fpf
+        LEFT JOIN forum_post fp ON fpf.post_id = fp.id
+        LEFT JOIN forum_category fc ON fp.category_id = fc.id
+        LEFT JOIN volunteer v ON fpf.volunteer_id = v.id
+        ORDER BY fpf.created_at DESC
+    </select>
+    
+    <!-- 删除收藏记录 -->
+    <delete id="deleteFavorite">
+        DELETE FROM forum_post_favorite WHERE id = #{id}
+    </delete>
+</mapper>

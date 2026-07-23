@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.ExchangeOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.ExchangeOrder">
+        <id property="id" column="id"/>
+        <result property="volunteerId" column="volunteer_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="totalPoints" column="total_points"/>
+        <result property="status" column="status"/>
+        <result property="address" column="address"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="phone" column="phone"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="trackingNumber" column="tracking_number"/>
+        <result property="createdAt" column="create_time"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsDescription" column="goods_description"/>
+        <result property="goodsImage" column="goods_image"/>
+        <result property="volunteerName" column="volunteer_name"/>
+        <result property="refundStatus" column="refund_status"/>
+        <result property="refundReason" column="refund_reason"/>
+        <result property="refundEvidence" column="refund_evidence"/>
+        <result property="refundApplyTime" column="refund_apply_time"/>
+        <result property="refundAuditTime" column="refund_audit_time"/>
+        <result property="refundAdminId" column="refund_admin_id"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT eo.*, 
+               g.name AS goods_name,
+               g.description AS goods_description,
+               g.image AS goods_image,
+               v.username AS volunteer_name
+        FROM exchange_order eo
+        LEFT JOIN goods g ON eo.goods_id = g.id
+        LEFT JOIN volunteer v ON eo.volunteer_id = v.id
+        ORDER BY eo.create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT eo.*, 
+               g.name AS goods_name,
+               g.description AS goods_description,
+               g.image AS goods_image,
+               v.username AS volunteer_name
+        FROM exchange_order eo
+        LEFT JOIN goods g ON eo.goods_id = g.id
+        LEFT JOIN volunteer v ON eo.volunteer_id = v.id
+        WHERE eo.id = #{id}
+    </select>
+
+    <select id="selectByVolunteerId" resultMap="BaseResultMap">
+        SELECT eo.*, 
+               g.name AS goods_name,
+               g.description AS goods_description,
+               g.image AS goods_image,
+               v.username AS volunteer_name
+        FROM exchange_order eo
+        LEFT JOIN goods g ON eo.goods_id = g.id
+        LEFT JOIN volunteer v ON eo.volunteer_id = v.id
+        WHERE eo.volunteer_id = #{volunteerId}
+        ORDER BY eo.create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.ExchangeOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exchange_order (volunteer_id, goods_id, quantity, total_points, status, address, contact_name, phone, order_number, tracking_number, create_time,
+                                   refund_status, refund_reason, refund_evidence, refund_apply_time, refund_audit_time, refund_admin_id)
+        VALUES (#{volunteerId}, #{goodsId}, #{quantity}, #{totalPoints}, #{status}, #{address}, #{contactName}, #{phone}, #{orderNumber}, #{trackingNumber}, #{createdAt},
+                #{refundStatus}, #{refundReason}, #{refundEvidence}, #{refundApplyTime}, #{refundAuditTime}, #{refundAdminId})
+    </insert>
+
+    <update id="update" parameterType="com.volunteer.entity.ExchangeOrder">
+        UPDATE exchange_order
+        SET volunteer_id = #{volunteerId},
+            goods_id = #{goodsId},
+            quantity = #{quantity},
+            total_points = #{totalPoints},
+            status = #{status},
+            address = #{address},
+            contact_name = #{contactName},
+            phone = #{phone},
+            order_number = #{orderNumber},
+            tracking_number = #{trackingNumber},
+            refund_status = #{refundStatus},
+            refund_reason = #{refundReason},
+            refund_evidence = #{refundEvidence},
+            refund_apply_time = #{refundApplyTime},
+            refund_audit_time = #{refundAuditTime},
+            refund_admin_id = #{refundAdminId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateRefundInfo">
+        UPDATE exchange_order
+        SET refund_status = #{refundStatus},
+            refund_reason = #{refundReason},
+            refund_evidence = #{refundEvidence},
+            refund_apply_time = #{refundApplyTime},
+            refund_audit_time = #{refundAuditTime},
+            refund_admin_id = #{refundAdminId}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE exchange_order
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM exchange_order WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByGoodsId" parameterType="long">
+        DELETE FROM exchange_order WHERE goods_id = #{goodsId}
+    </delete>
+    
+    <!-- 统计方法 -->
+    <!-- 获取志愿者兑换成功的订单数量（已完成且未退款） -->
+    <select id="countSuccessfulOrdersByVolunteer" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM exchange_order 
+        WHERE volunteer_id = #{volunteerId}
+        AND status = '已完成'
+        AND (refund_status IS NULL OR refund_status != '已通过')
+    </select>
+    
+    <!-- 获取所有志愿者兑换成功的订单总数（已完成且未退款） -->
+    <select id="countTotalSuccessfulOrders" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM exchange_order 
+        WHERE status = '已完成'
+        AND (refund_status IS NULL OR refund_status != '已通过')
+    </select>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.volunteer.mapper.VolunteerAddressMapper">
+
+    <resultMap id="BaseResultMap" type="com.volunteer.entity.VolunteerAddress">
+        <id property="id" column="id"/>
+        <result property="volunteerId" column="volunteer_id"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="district" column="district"/>
+        <result property="detailAddress" column="detail_address"/>
+        <result property="label" column="label"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="createdAt" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByVolunteerId" resultMap="BaseResultMap">
+        SELECT * FROM volunteer_address
+        WHERE volunteer_id = #{volunteerId}
+        ORDER BY is_default DESC, update_time DESC
+    </select>
+
+    <select id="selectByIdAndVolunteerId" resultMap="BaseResultMap">
+        SELECT * FROM volunteer_address
+        WHERE id = #{id} AND volunteer_id = #{volunteerId}
+    </select>
+
+    <insert id="insert" parameterType="com.volunteer.entity.VolunteerAddress" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO volunteer_address (volunteer_id, contact_name, contact_phone, province, city, district, detail_address, label, is_default, create_time, update_time)
+        VALUES (#{volunteerId}, #{contactName}, #{contactPhone}, #{province}, #{city}, #{district}, #{detailAddress}, #{label}, #{isDefault}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.volunteer.entity.VolunteerAddress">
+        UPDATE volunteer_address
+        SET contact_name = #{contactName},
+            contact_phone = #{contactPhone},
+            province = #{province},
+            city = #{city},
+            district = #{district},
+            detail_address = #{detailAddress},
+            label = #{label},
+            is_default = #{isDefault},
+            update_time = NOW()
+        WHERE id = #{id} AND volunteer_id = #{volunteerId}
+    </update>
+
+    <delete id="deleteByIdAndVolunteerId">
+        DELETE FROM volunteer_address WHERE id = #{id} AND volunteer_id = #{volunteerId}
+    </delete>
+
+    <delete id="batchDeleteByIdsAndVolunteerId">
+        DELETE FROM volunteer_address
+        WHERE volunteer_id = #{volunteerId}
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="clearDefaultByVolunteerId">
+        UPDATE volunteer_address SET is_default = 0
+        WHERE volunteer_id = #{volunteerId}
+    </update>
+
+    <update id="setDefaultByIdAndVolunteerId">
+        UPDATE volunteer_address SET is_default = 1
+        WHERE id = #{id} AND volunteer_id = #{volunteerId}
+    </update>
+
+    <!-- 管理员统计方法 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM volunteer_address
+    </select>
+
+</mapper>

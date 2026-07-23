@@ -1,0 +1,27 @@
+{
+  "name": "volunteer-system-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
+    "@vueup/vue-quill": "^1.2.0",
+    "axios": "^1.5.0",
+    "echarts": "^5.4.3",
+    "element-plus": "^2.3.14",
+    "ethers": "^6.7.1",
+    "html2canvas": "^1.4.1",
+    "pinia": "^2.1.6",
+    "solc": "^0.8.34",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "vite": "^4.4.9"
+  }
+}

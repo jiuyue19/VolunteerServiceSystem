@@ -1,0 +1,465 @@
+<style scoped>
+.certificate-page {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: calc(100vh - 60px);
+}
+
+/* 页面头部 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.page-header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.page-header h2 .el-icon {
+  font-size: 32px;
+  color: #409eff;
+}
+
+.subtitle {
+  color: #909399;
+  margin: 8px 0 0 44px;
+  font-size: 14px;
+}
+
+/* 钱包按钮 */
+.wallet-button {
+  font-size: 14px;
+  padding: 10px 20px;
+  height: auto;
+}
+
+.wallet-button .el-icon {
+  font-size: 16px;
+}
+
+/* 钱包下拉菜单 */
+.wallet-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.wallet-info-item .label {
+  color: #909399;
+  font-size: 13px;
+}
+
+/* 警告提示 */
+.wallet-alert {
+  margin-bottom: 24px;
+}
+
+.wallet-alert p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* 统计卡片 */
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+  height: 100%;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+/* 卡片通用样式 */
+.chain-data-card,
+.certificate-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-header span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 证书预览 */
+.certificate-preview {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.certificate-container {
+  width: 100%;
+  max-width: 900px;
+  padding: 0;
+  border-radius: 16px;
+}
+
+/* 彩虹渐变边框 */
+.certificate-border-rainbow {
+  background: linear-gradient(
+    90deg,
+    #ff6b6b 0%,
+    #feca57 16.67%,
+    #48dbfb 33.33%,
+    #1dd1a1 50%,
+    #5f27cd 66.67%,
+    #ee5a6f 83.33%,
+    #ff6b6b 100%
+  );
+  padding: 6px;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  animation: rainbow-rotate 8s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes rainbow-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.certificate-content {
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  padding: 60px 80px;
+  position: relative;
+  min-height: 700px;
+}
+
+/* 证书头部 */
+.certificate-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.certificate-logo {
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  font-size: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.certificate-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #303133;
+  margin: 0 0 12px 0;
+  letter-spacing: 8px;
+}
+
+.certificate-subtitle {
+  font-size: 16px;
+  color: #909399;
+  letter-spacing: 4px;
+  margin: 0;
+}
+
+/* 证书主体 */
+.certificate-body {
+  margin-bottom: 50px;
+}
+
+.recipient-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.recipient-label {
+  font-size: 18px;
+  color: #606266;
+  margin: 0 0 12px 0;
+}
+
+.recipient-name {
+  font-size: 36px;
+  font-weight: 700;
+  color: #303133;
+  margin: 0;
+  padding: 0 20px 10px;
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1, #5f27cd);
+  border-image-slice: 1;
+  display: inline-block;
+}
+
+.content-section {
+  text-align: center;
+  line-height: 2;
+}
+
+.content-text {
+  font-size: 18px;
+  color: #606266;
+  margin: 12px 0;
+}
+
+.hours-highlight {
+  margin: 30px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-radius: 12px;
+}
+
+.hours-number {
+  font-size: 72px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 50%, #feca57 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-right: 8px;
+}
+
+.hours-unit {
+  font-size: 28px;
+  color: #606266;
+}
+
+/* 区块链验证 */
+.blockchain-section {
+  margin-top: 40px;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dcdfe6;
+}
+
+.blockchain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #5f27cd 50%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.blockchain-info {
+  font-size: 14px;
+  color: #606266;
+  line-height: 2;
+}
+
+.blockchain-info p {
+  margin: 4px 0;
+}
+
+/* 证书底部 */
+.certificate-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 50px;
+}
+
+.seal-section {
+  text-align: center;
+}
+
+.seal {
+  width: 120px;
+  height: 120px;
+  border: 4px solid #e74c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  position: relative;
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.seal-inner {
+  color: #e74c3c;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.seal-date {
+  font-size: 14px;
+  color: #606266;
+  margin: 0;
+}
+
+/* 装饰角 */
+.corner-decoration {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border: 3px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.corner-decoration.top-left {
+  top: 20px;
+  left: 20px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 8px 0 0 0;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #ff6b6b, #feca57) border-box;
+}
+
+.corner-decoration.top-right {
+  top: 20px;
+  right: 20px;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 8px 0 0;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #48dbfb, #1dd1a1) border-box;
+}
+
+.corner-decoration.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 8px;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #5f27cd, #ee5a6f) border-box;
+}
+
+.corner-decoration.bottom-right {
+  bottom: 20px;
+  right: 20px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 8px 0;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #feca57, #ff6b6b) border-box;
+}
+
+/* 证书提示 */
+.certificate-tips {
+  margin-top: 24px;
+}
+
+.certificate-tips :deep(.el-alert__description) p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .certificate-page {
+    padding: 16px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .certificate-content {
+    padding: 40px 30px;
+  }
+  
+  .certificate-title {
+    font-size: 32px;
+    letter-spacing: 4px;
+  }
+  
+  .recipient-name {
+    font-size: 28px;
+  }
+  
+  .hours-number {
+    font-size: 48px;
+  }
+  
+  .hours-unit {
+    font-size: 20px;
+  }
+  
+  .content-text {
+    font-size: 16px;
+  }
+}
+</style>
